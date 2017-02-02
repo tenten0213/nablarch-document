@@ -178,59 +178,48 @@ JOB定義ファイル
 
   詳細は、 :ref:`jsr352_batch` 及び `JSR352 Specification <https://jcp.org/en/jsr/detail?id=352>`_ を参照すること。
 
+ETL用共通設定ファイル
+  ETLの共通設定を行う設定ファイル。
+
+  コンフィグファイルで作成する必要がある。
+
+  詳細は、 :ref:`etl-common-configuration` を参照。
+
 ETL用設定ファイル
-  ETLの共通設定及びJOB毎の設定を行う設定ファイル。
+  ETLのJOB毎の設定を行う設定ファイル。
 
   JSON形式で作成する必要がある。
 
-  詳細は、 :ref:`etl-configuration` を参照。
+  詳細は、 :ref:`etl-json-configuration` を参照。
 
-.. _etl-configuration:
+.. _etl-common-configuration:
+
+ETL用共通設定ファイルを作成する
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ETL用共通設定ファイルには、ETL JOB全体で共通となる値の設定を行う。
+設定はコンフィグファイルに記述し、コンポーネント定義ファイルに定義することでF/Wに読み込まれる。
+コンフィグファイルの記述例は下記を参照。
+
+  .. code-block:: javascript
+
+    inputFileBasePath=file/input
+    outputFileBasePath=file/output
+    sqlLoaderControlFileBasePath=sqlloader/ctl
+    sqlLoaderOutputFileBasePath=sqlloader/log
+
+.. _etl-json-configuration:
 
 ETL用設定ファイルを作成する
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ETL用設定ファイルは、システム共通設定部とJOB毎の設定部で構成される。
+ETL用設定ファイルは、JOB毎の設定部で構成される。
 
 JOB毎の設定部では、ETLの各フェーズに対応する設定を行う。
 JOB毎の設定部は、 ``JOB ID`` 及び ``STEP ID`` でJOB定義ファイルと紐付いている。
 
-ETL用設定ファイルは、デフォルトではクラスパス配下の ``META-INF/etl.json`` となる。
-ETL用設定ファイルのパスをデフォルトから変更したい場合は、 :ref:`etl-file_path` を参照。
+ETL用設定ファイルは、ファイル名を ``JOB ID.json`` とし、 ``META-INF/batch-config/`` 配下に配置すること。
 
-システム共通設定部
-  システム共通設定部には、ETL JOB全体で共通となる値の設定を行う。
-  設定内容は次の例を参照。
-
-  .. code-block:: javascript
-
-    {
-      // ロード対象ファイルの配置ディレクトリのパス
-      "inputFileBasePath": "file/input",
-
-      // ファイルの出力先ディレクトリのパス
-      "outputFileBasePath": "file/output",
-
-      //--------------------------------------------------------------------------------
-      // 以下の2項目はOracle SQL*Loaderを使用する場合のみ必要
-      //--------------------------------------------------------------------------------
-      // SQL*Loaderのコントロールファイル配置ディレクトリのパス
-      "sqlLoaderControlFileBasePath": "sqlloader/ctl",
-
-      // SQL*Loaderが出力するログなどの出力先ディレクトリのパス
-      "sqlLoaderOutputFileBasePath": "sqlloader/log",
-
-      // JOBの設定
-      "jobs": {
-        "job1": {
-        },
-        "job2": {
-          // システム共通設定を上書きする場合には、
-          // 対象JOB配下に同名のプロパティを定義して上書きを行う。
-          "inputFileBasePath": "file/job2/input",
-          "outputFileBasePath": "file/job2/output",
-        }
-      }
-    }
+  .. tip::
+    ETL用設定ファイルのローダーを変更したい場合は、 :ref:`etl-loader` を参照。
 
 JOB毎の設定部
   JOB毎の設定部には、JOB毎に必要となる各フェーズ(Extract/Transform/Load)の設定を行う。
@@ -241,33 +230,27 @@ JOB毎の設定部
 
     .. code-block:: javascript
 
-      "jobs": {
-        "sample-job-id": {
-          "steps": {
-            //------------------------------------------------------------
-            // 明示的にワークテーブルをクリーニングする場合には、
-            // クリーニング用の設定を行う。
-            //------------------------------------------------------------
-            "truncate-step": {
-              // 固定で"truncate"を指定
-              "type": "truncate",
-
-              // 削除対象のテーブルに対応するEntityクラスのFQCNを配列で指定する。
-              "entities": [
-                  "com.nablarch.example.app.batch.ee.dto.ZipCodeDto"
-              ]
-            },
-
-            "extract-step": {
-              // 固定で"file2db"を指定
-              "type": "file2db",
-
-              // 一時テーブルに対応するBeanを指定
-              "bean": "com.nablarch.example.app.batch.ee.dto.ZipCodeDto",
-
-              // 入力データのファイル名を指定
-              "fileName": "KEN_ALL.CSV"
-            }
+      {
+        "steps": {
+          //------------------------------------------------------------
+          // 明示的にワークテーブルをクリーニングする場合には、
+          // クリーニング用の設定を行う。
+          //------------------------------------------------------------
+          "truncate-step": {
+            // 固定で"truncate"を指定
+            "type": "truncate",
+            // 削除対象のテーブルに対応するEntityクラスのFQCNを配列で指定する。
+            "entities": [
+              "com.nablarch.example.app.batch.ee.dto.ZipCodeDto"
+            ]
+          },
+          "extract-step": {
+            // 固定で"file2db"を指定
+            "type": "file2db",
+            // 一時テーブルに対応するBeanを指定
+            "bean": "com.nablarch.example.app.batch.ee.dto.ZipCodeDto",
+            // 入力データのファイル名を指定
+            "fileName": "KEN_ALL.CSV"
           }
         }
       }
@@ -310,29 +293,23 @@ JOB毎の設定部
 
     .. code-block:: javascript
 
-      "jobs": {
-        "sample-job-id": {
-          "steps": {
-            "validation-step" : {
-              // 固定で"validation"を指定
-              "type": "validation",
-
-              // ワークテーブルに対応したBeanオブジェクトのクラス名をFQCNで設定する。
-              "bean": "com.nablarch.example.app.batch.ee.dto.ZipCodeDto",
-
-              // エラーのあったレコードを書き込むためのエラーテーブルに対応した
-              // Beanオブジェクトのクラス名をFQCNで設定する。
-              "errorEntity": "com.nablarch.example.app.batch.ee.dto.ZipCodeErrorEntity",
-
-              // エラー発生時に処理を継続する場合には、modeにCONTINUEを設定する。
-              // 異常終了させる場合には、ABORTを設定する。
-              "mode": "CONTINUE",
-
-              // 一定数のエラー発生時にJOBを異常終了させたい場合は、
-              // errorLimitに許容するエラー件数を指定する。
-              // 以下のように1000を設定した場合、1001件目のエラーでJOBが異常終了する。
-              "errorLimit": 1000
-            }
+      {
+        "steps": {
+          "validation-step": {
+            // 固定で"validation"を指定
+            "type": "validation",
+            // ワークテーブルに対応したBeanオブジェクトのクラス名をFQCNで設定する。
+            "bean": "com.nablarch.example.app.batch.ee.dto.ZipCodeDto",
+            // エラーのあったレコードを書き込むためのエラーテーブルに対応した
+            // Beanオブジェクトのクラス名をFQCNで設定する。
+            "errorEntity": "com.nablarch.example.app.batch.ee.dto.ZipCodeErrorEntity",
+            // エラー発生時に処理を継続する場合には、modeにCONTINUEを設定する。
+            // 異常終了させる場合には、ABORTを設定する。
+            "mode": "CONTINUE",
+            // 一定数のエラー発生時にJOBを異常終了させたい場合は、
+            // errorLimitに許容するエラー件数を指定する。
+            // 以下のように1000を設定した場合、1001件目のエラーでJOBが異常終了する。
+            "errorLimit": 1000
           }
         }
       }
@@ -355,77 +332,67 @@ JOB毎の設定部
 
     .. code-block:: javascript
 
-      "jobs": {
-        "sample-job-id": {
-          "steps": {
-            //------------------------------------------------------------
-            // 洗い替えモードの設定例
-            //------------------------------------------------------------
-            "db-output-step": {
-              // 固定で"db2db"を指定
-              "type": "db2db",
-
-              // 出力対象テーブルに対応するBeanオブジェクトのクラス名をFQCNで設定する
-              "bean": "com.nablarch.example.app.entity.ZipCodeData",
-
-              // データの変換用SQLのSQL_IDを設定する
-              "sqlId": "SELECT_ZIPCODE_FROM_WORK",
-
-              // insertModeを指定する。
-              // insertModeにORACLE_DIRECT_PATHを指定するとダイレクトパスインサートが使用される。
-              // insertModeを指定しない場合、デフォルトのNORMALが適用される。
-              "insertMode": "NORMAL",
-
-              // 洗い替え時に何件ごとにデータを移送するかとワークテーブルに対応するBeanを指定
-              // ※insertModeにORACLE_DIRECT_PATHを指定した場合、updateSizeを設定することは出来ない
-              "updateSize": {
-                "size": 200000,
-                "bean": "com.nablarch.example.app.batch.ee.dto.ZipCodeDto"
-              }
-            },
-
-            //------------------------------------------------------------
-            // マージモードの設定例
-            //------------------------------------------------------------
-            "merge-step": {
-              // 固定で"db2db"を指定
-              "type": "db2db",
-
-              // 出力対象テーブルに対応するBeanオブジェクトのクラス名をFQCNで設定する
-              "bean": "com.nablarch.example.app.entity.ZipCodeData",
-
-              // データの変換用SQLのSQL_IDを設定する
-              "sqlId": "SELECT_ZIPCODE_FROM_WORK",
-
-              // MERGEのON句に指定するカラム名を配列で設定する
-              "mergeOnColumns": ["LOCAL_GOVERNMENT_CODE","ZIP_CODE_5DIGIT","ZIP_CODE_7DIGIT"],
-
-              // MERGE処理中、何件ごとに更新するかとワークテーブルに対応するBeanを指定
-              "updateSize": {
-                "size": 200000,
-                "bean": "com.nablarch.example.app.batch.ee.dto.ZipCodeDto"
-              }
-            },
-
-            //------------------------------------------------------------
-            // ファイル出力の設定例
-            //------------------------------------------------------------
-            "file-output-step": {
-              // 固定で"db2file"を指定
-              "type": "db2file",
-
-              // 出力ファイルに対応するBeanオブジェクトのクラス名をFQCNで設定する
-              "bean": "com.nablarch.example.app.batch.ee.dto.ZipCodeDto",
-
-              // 出力ファイルのファイル名を設定する
-              "fileName": "etl-zip-code-output-chunk.csv",
-
-              // データの変換用SQLのSQL_IDを設定する
-              "sqlId": "SELECT_ZIPCODE"
+      {
+        "steps": {
+          //------------------------------------------------------------
+          // 洗い替えモードの設定例
+          //------------------------------------------------------------
+          "db-output-step": {
+            // 固定で"db2db"を指定
+            "type": "db2db",
+            // 出力対象テーブルに対応するBeanオブジェクトのクラス名をFQCNで設定する
+            "bean": "com.nablarch.example.app.entity.ZipCodeData",
+            // データの変換用SQLのSQL_IDを設定する
+            "sqlId": "SELECT_ZIPCODE_FROM_WORK",
+            // insertModeを指定する。
+            // insertModeにORACLE_DIRECT_PATHを指定するとダイレクトパスインサートが使用される。
+            // insertModeを指定しない場合、デフォルトのNORMALが適用される。
+            "insertMode": "NORMAL",
+            // 洗い替え時に何件ごとにデータを移送するかとワークテーブルに対応するBeanを指定
+            // ※insertModeにORACLE_DIRECT_PATHを指定した場合、updateSizeを設定することは出来ない
+            "updateSize": {
+              "size": 200000,
+              "bean": "com.nablarch.example.app.batch.ee.dto.ZipCodeDto"
             }
+          },
+          //------------------------------------------------------------
+          // マージモードの設定例
+          //------------------------------------------------------------
+          "merge-step": {
+            // 固定で"db2db"を指定
+            "type": "db2db",
+            // 出力対象テーブルに対応するBeanオブジェクトのクラス名をFQCNで設定する
+            "bean": "com.nablarch.example.app.entity.ZipCodeData",
+            // データの変換用SQLのSQL_IDを設定する
+            "sqlId": "SELECT_ZIPCODE_FROM_WORK",
+            // MERGEのON句に指定するカラム名を配列で設定する
+            "mergeOnColumns": [
+              "LOCAL_GOVERNMENT_CODE",
+              "ZIP_CODE_5DIGIT",
+              "ZIP_CODE_7DIGIT"
+            ],
+            // MERGE処理中、何件ごとに更新するかとワークテーブルに対応するBeanを指定
+            "updateSize": {
+              "size": 200000,
+              "bean": "com.nablarch.example.app.batch.ee.dto.ZipCodeDto"
+            }
+          },
+          //------------------------------------------------------------
+          // ファイル出力の設定例
+          //------------------------------------------------------------
+          "file-output-step": {
+            // 固定で"db2file"を指定
+            "type": "db2file",
+            // 出力ファイルに対応するBeanオブジェクトのクラス名をFQCNで設定する
+            "bean": "com.nablarch.example.app.batch.ee.dto.ZipCodeDto",
+            // 出力ファイルのファイル名を設定する
+            "fileName": "etl-zip-code-output-chunk.csv",
+            // データの変換用SQLのSQL_IDを設定する
+            "sqlId": "SELECT_ZIPCODE"
           }
         }
       }
+
 
     JOB定義ファイル例
       上記ETL設定ファイルに対応するJOB定義ファイル例を示す。
@@ -457,27 +424,20 @@ JOB毎の設定部
           </chunk>
         </step>
 
-.. _etl-file_path:
+.. _etl-loader:
 
-ETL用設定ファイルのパスを変更する
+ETL用設定ファイルのローダーを変更する
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ETL用設定ファイルのパスを変更する場合は、
-:java:extdoc:`JsonConfigLoader <nablarch.etl.config.JsonConfigLoader>` にETL用設定ファイルのパスを設定して、
-コンポーネント設定ファイルに定義する必要がある。
+ETL用設定ファイルのローダーを変更する場合は、
+コンポーネント設定ファイルに :java:extdoc:`EtlConfigLoader <nablarch.etl.config.EtlConfigLoader>` を実装したローダーを定義する必要がある。
 
 例を以下に示す。
 
 ポイント
   * コンポーネント名は、 ``etlConfigLoader`` とすること。
-  * ``configPath`` プロパティに、ETL用設定ファイルのパスを設定する。
+  * ETL用設定ファイルのローダーを設定する。
 
 .. code-block:: xml
 
-  <component name="etlConfigLoader" class="nablarch.etl.config.JsonConfigLoader">
-    <property name="configPath" value="custom.json"/>
-  </component>
+  <component name="etlConfigLoader" class="sample.app.etl.SampleConfigLoader" />
 
-.. important::
-
-  現状、ETL用設定ファイルのパスを複数設定することはできない。
-  そのため、ETL用の設定は複数のファイルに分割せずに1ファイルにまとめて定義すること。
