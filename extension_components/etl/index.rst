@@ -33,7 +33,7 @@ ETLを使うことで以下のメリットが得られる。
 .. important::
 
   ETLを使用したバッチアプリケーションの実例は、`Exampleアプリケーション <https://github.com/nablarch/nablarch-example-batch-ee>`_
-  の以下のジョブを参照。
+  の以下のJOBを参照。
 
   * etl-zip-code-csv-to-db-insert-batchlet
   * etl-zip-code-csv-to-db-chunk
@@ -74,14 +74,14 @@ Extractフェーズでは、ファイルの内容をデータベース上のワ�
   Oracle SQL*Loaderを使用したデータのロード
     Oracleデータベースに付属のSQL*Loaderユーティリティを用いたロード処理を行う。
 
-    ジョブ定義ファイルのExtractフェーズに対応するステップ定義に :java:extdoc:`sqlLoaderBatchlet <nablarch.etl.SqlLoaderBatchlet>` を設定することで、SQL*Loaderを使用したロードが行われる。
+    JOB定義ファイルのExtractフェーズに対応するステップ定義に :java:extdoc:`sqlLoaderBatchlet <nablarch.etl.SqlLoaderBatchlet>` を設定することで、SQL*Loaderを使用したロードが行われる。
 
   .. _etl-chunk_loader:
 
   :ref:`JSR352 <jsr352_batch>` のChunkステップを使用したデータのロード
     :ref:`JSR352 <jsr352_batch>` のChunkステップを使用して、ファイルからデータを読み込み順次ワークテーブルに登録(INSERT)を行う。
 
-    ジョブ定義ファイルのExtractフェーズに対応するステップ定義は、以下のChunkステップを定義する。
+    JOB定義ファイルのExtractフェーズに対応するステップ定義は、以下のChunkステップを定義する。
 
     * readerには、 :java:extdoc:`fileItemReader <nablarch.etl.FileItemReader>` を登録する
     * writerには、 :java:extdoc:`databaseItemWriter <nablarch.etl.DatabaseItemWriter>` を登録する
@@ -89,7 +89,7 @@ Extractフェーズでは、ファイルの内容をデータベース上のワ�
     .. tip::
 
       ワークテーブルをクリーニングする必要がある場合には、データのロード処理の前にクリーニングのステップを配置すること。
-      クリーニング処理を使用する場合には、ジョブ定義ファイルのクリーニングに対応するステップ定義に :java:extdoc:`tableCleaningBatchlet <nablarch.etl.TableCleaningBatchlet>` を設定する。
+      クリーニング処理を使用する場合には、JOB定義ファイルのクリーニングに対応するステップ定義に :java:extdoc:`tableCleaningBatchlet <nablarch.etl.TableCleaningBatchlet>` を設定する。
 
     .. tip::
 
@@ -108,7 +108,7 @@ Transformフェーズでは、Extractフェーズでワークテーブルに取�
   データの変換処理は、LoadフェーズのSQL文実行タイミングで実施される。
 
 データのバリデーション
-  データのバリデーションを行う場合は、 ジョブ定義ファイルにバリデーション用のステップを定義する。
+  データのバリデーションを行う場合は、 JOB定義ファイルにバリデーション用のステップを定義する。
   バリデーションステップの定義には、 :java:extdoc:`validationBatchlet <nablarch.etl.ValidationBatchlet>` を登録する。
 
   バリデーションエラーが発生した場合、そのレコードの情報はワークテーブルと全く同じレイアウトのエラーテーブルに移動される。
@@ -116,12 +116,12 @@ Transformフェーズでは、Extractフェーズでワークテーブルに取�
 
   バリデーションエラーが発生した場合の動作を次から選択できる。
 
-  :アボートモード(デフォルト): バリデーションエラーが発生した場合、ジョブを異常終了する。
-  :継続モード: ジョブは終了せずに次のフェーズ(ステップ)に処理が移動する。
+  :アボートモード(デフォルト): バリデーションエラーが発生した場合、JOBを異常終了する。
+  :継続モード: JOBは終了せずに次のフェーズ(ステップ)に処理が移動する。
 
   .. tip::
     上記のモードとは別に、許容するエラー数を設定することができる。
-    許容するエラー数を設定した場合、モード設定とは関係なく、設定値を超えるバリデーションエラーが発生した時点でジョブは異常終了する。
+    許容するエラー数を設定した場合、モード設定とは関係なく、設定値を超えるバリデーションエラーが発生した時点でJOBは異常終了する。
 
 データの変換処理
   データの変換のために作成するSQLは以下のルールに従うこと。
@@ -143,16 +143,16 @@ Transformフェーズのデータ変換用SQL文を実行し、データをデ�
 
   :洗い替えモード: 既存のデータを全て削除後に登録処理を行う。
 
-                   ジョブ定義ファイルの該当ステップには、 :java:extdoc:`deleteInsertBatchlet <nablarch.etl.DeleteInsertBatchlet>` を設定する。
+                   JOB定義ファイルの該当ステップには、 :java:extdoc:`deleteInsertBatchlet <nablarch.etl.DeleteInsertBatchlet>` を設定する。
 
   :マージモード: 既存のデータが存在している場合には更新処理を、データが存在していない場合には、追加処理を行う。
 
-                 ジョブ定義ファイルの該当ステップには、 :java:extdoc:`mergeBatchlet <nablarch.etl.MergeBatchlet>` を設定する。
+                 JOB定義ファイルの該当ステップには、 :java:extdoc:`mergeBatchlet <nablarch.etl.MergeBatchlet>` を設定する。
 
   大量データを一括で登録(更新)した場合、UNDO表領域(Oracleの場合)が不足する可能性があるため、分割実行する機能を提供する。
   分割実行する場合には、一度に実行する単位と実行対象を取得するための条件を設定する。
 
-  データの変換がSQLでは実施できない場合(Javaのライブラリを使用する等)、以下のChunkステップをジョブ定義ファイルの該当ステップに定義する。
+  データの変換がSQLでは実施できない場合(Javaのライブラリを使用する等)、以下のChunkステップをJOB定義ファイルの該当ステップに定義する。
 
   * readerには、 :java:extdoc:`databaseItemReader <nablarch.etl.DatabaseItemReader>` を登録する
   * writerには、 :java:extdoc:`databaseItemWriter <nablarch.etl.DatabaseItemWriter>` を登録する
@@ -161,7 +161,7 @@ Transformフェーズのデータ変換用SQL文を実行し、データをデ�
   Oracleデータベースの場合には、ダイレクトパスインサートモードを選択することで、一括でデータを登録することもできる。(洗い替えモードの場合のみ)
 
 ファイル出力
-  データをファイルに出力する場合は、ジョブ定義ファイルの該当ステップに以下のChunkステップを定義する。
+  データをファイルに出力する場合は、JOB定義ファイルの該当ステップに以下のChunkステップを定義する。
 
   * readerには、 :java:extdoc:`databaseItemReader <nablarch.etl.DatabaseItemReader>` を登録する
   * writerには、 :java:extdoc:`fileItemWriter <nablarch.etl.FileItemWriter>` を登録する
@@ -169,12 +169,12 @@ Transformフェーズのデータ変換用SQL文を実行し、データをデ�
 使用方法
 --------------------------------------------------
 
-ETL ジョブを実行するための設定を行う
+ETL JOBを実行するための設定を行う
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ETL ジョブを実行するためには以下の設定ファイルが必要となる。
+ETL JOBを実行するためには以下の設定ファイルが必要となる。
 
-ジョブ定義ファイル
-  ETLジョブのジョブ構成を定義するファイル。
+JOB定義ファイル
+  ETL JOBのJOB構成を定義するファイル。
 
   詳細は、 :ref:`jsr352_batch` 及び `JSR352 Specification <https://jcp.org/en/jsr/detail?id=352>`_ を参照すること。
 
@@ -185,10 +185,10 @@ ETL用共通設定ファイル
 
   詳細は、 :ref:`etl-common-configuration` を参照。
 
-ETL用ジョブ設定ファイル
-  ETLのジョブ設定を行う設定ファイル。
+ETL用JOB設定ファイル
+  ETLのJOB設定を行う設定ファイル。
 
-  ジョブ毎にJSON形式で作成する必要がある。
+  JOB毎にJSON形式で作成する必要がある。
 
   詳細は、 :ref:`etl-json-configuration` を参照。
 
@@ -196,34 +196,28 @@ ETL用ジョブ設定ファイル
 
 ETL用共通設定ファイルを作成する
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ETL用共通設定ファイルには、ETL ジョブ全体で共通となる値の設定を行う。
+ETL用共通設定ファイルには、ETL JOB全体で共通となる値の設定を行う。
+デフォルトでは、入力ファイルパス ``inputFileBasePath`` と出力ファイルパス ``outputFileBasePath`` の設定が必要となる。
+SQL*Loaderを使用してデータを取り込む場合には、 コントロールファイルのパス ``sqlLoaderControlFileBasePath`` と取り込み結果の出力先 ``sqlLoaderOutputFileBasePath`` の設定が必要になる。
+
 設定はコンフィグファイルに記述し、コンポーネント定義ファイルに定義することでF/Wに読み込まれる。
-
-コンフィグファイルの記述例は下記を参照。
-
-  .. code-block:: properties
-
-    inputFileBasePath=file/input
-    outputFileBasePath=file/output
-    sqlLoaderControlFileBasePath=sqlloader/ctl
-    sqlLoaderOutputFileBasePath=sqlloader/log
+設定方法は :ref:`repository-user_environment_configuration` を参照。
 
 .. _etl-json-configuration:
 
-ETL用ジョブ設定ファイルを作成する
+ETL用JOB設定ファイルを作成する
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ETL用ジョブ設定ファイルは、ジョブ毎にわけて作成する。
-ETL用ジョブ設定ファイルは、 ``JOB ID`` 及び ``STEP ID`` でジョブ定義ファイルと紐付いている。
+ETL用JOB設定ファイルは、JOB毎にわけて作成する。
+ETL用JOB設定ファイルの ``JOB ID`` と ``STEP ID`` をJOB定義ファイルのそれと紐付けることで、ETL用JOB設定ファイルで行った設定をJOBに組み込むことができる。
 
-ETL用ジョブ設定ファイルは、ファイル名を ``JOB ID.json`` とし、 ``META-INF/batch-config/`` 配下に配置すること。
+ETL用JOB設定ファイルは、ファイル名を ``JOB ID.json`` とし、 ``META-INF/batch-config/`` 配下に配置する。
 
   .. tip::
-    ETL用ジョブ設定ファイルのローダーを変更したい場合は、 :ref:`etl-loader` を参照。
+    ETL用JOB設定ファイルのローダーを変更したい場合は、 :ref:`etl-loader` を参照。
 
-ジョブ毎の設定
-  ジョブ毎の設定は、ジョブ定義ファイルとETL用ジョブ設定ファイルで構成される。
-  ジョブ定義ファイルは、ジョブ構成の設定を行う。
-  ETL用ジョブ設定ファイルには、ジョブ毎に必要となる各フェーズ(Extract/Transform/Load)の設定を行う。
+JOB毎の設定
+  JOB毎にJOB定義ファイルとETL用JOB設定ファイルへの設定が必要となる。
+  JOB定義ファイルにはJOBの設定を行い、ETL用JOB設定ファイルには、JOB毎に必要となる各フェーズ(Extract/Transform/Load)の設定を行う。
 
   Extractフェーズの設定
     Extractフェーズでは、入力ファイルの内容をワークテーブルに取り込むための設定を行う。
@@ -256,8 +250,8 @@ ETL用ジョブ設定ファイルは、ファイル名を ``JOB ID.json`` とし
         }
       }
 
-    ジョブ定義ファイル例
-      上記ETL設定ファイルに対応するジョブ定義ファイル例を示す。
+    JOB定義ファイル例
+      上記ETL設定ファイルに対応するJOB定義ファイル例を示す。
       なお、以下の設定ファイルには、データベース接続設定などは記載していない。
 
       .. code-block:: xml
@@ -307,17 +301,17 @@ ETL用ジョブ設定ファイルは、ファイル名を ``JOB ID.json`` とし
             // エラー発生時に処理を継続する場合には、modeにCONTINUEを設定する。
             // 異常終了させる場合には、ABORTを設定する。
             "mode": "CONTINUE",
-            // 一定数のエラー発生時にジョブを異常終了させたい場合は、
+            // 一定数のエラー発生時にJOBを異常終了させたい場合は、
             // errorLimitに許容するエラー件数を指定する。
-            // 以下のように1000を設定した場合、1001件目のエラーでジョブが異常終了する。
+            // 以下のように1000を設定した場合、1001件目のエラーでJOBが異常終了する。
             "errorLimit": 1000
           }
         }
       }
 
 
-    ジョブ定義ファイル例
-      上記ETL設定ファイルに対応するジョブ定義ファイル例を示す。
+    JOB定義ファイル例
+      上記ETL設定ファイルに対応するJOB定義ファイル例を示す。
       なお、以下の設定ファイルには、データベース接続設定などは記載していない。
 
       .. code-block:: xml
@@ -395,8 +389,8 @@ ETL用ジョブ設定ファイルは、ファイル名を ``JOB ID.json`` とし
       }
 
 
-    ジョブ定義ファイル例
-      上記ETL設定ファイルに対応するジョブ定義ファイル例を示す。
+    JOB定義ファイル例
+      上記ETL設定ファイルに対応するJOB定義ファイル例を示す。
       なお、以下の設定ファイルには、データベース接続設定などは記載していない。
 
       .. code-block:: xml
@@ -427,16 +421,15 @@ ETL用ジョブ設定ファイルは、ファイル名を ``JOB ID.json`` とし
 
 .. _etl-loader:
 
-ETL用ジョブ設定ファイルの読み込み方を変更する
+ETL用JOB設定ファイルの読み込み方を変更する
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ETL用ジョブ設定ファイルの読み込み方を変更する場合は、 :java:extdoc:`EtlConfigLoader <nablarch.etl.config.EtlConfigLoader>` を実装したローダーに差し替える必要がある。
+ETL用JOB設定ファイルの読み込み方を変更する場合は、 :java:extdoc:`EtlConfigLoader <nablarch.etl.config.EtlConfigLoader>` を実装したローダーに差し替える必要がある。
 設定はコンポーネント設定ファイルに行う。
 
 例を以下に示す。
 
 ポイント
   * コンポーネント名は、 ``etlConfigLoader`` とすること。
-  * 実装したETL用ジョブ設定ファイルのローダーを設定する。
 
 .. code-block:: xml
 
